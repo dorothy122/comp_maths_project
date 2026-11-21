@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.ndimage import label, sum
+from scipy.ndimage import label, sum, histogram
 import matplotlib as mpl
 areaImg=0
+import math
 
 def generateMaterial(L,p):
     global areaImg
@@ -72,21 +73,52 @@ def simulate(LValue,Pvalue,simNumber=1000):
     return averageDict
 
 
-def plotSim(L,P,S=100):
+def bining(d:dict, binValues:list):
+    retDict={b:0 for b in binValues }
 
-     data= simulate(L,P,S)
+    for k,v in d.items():
 
-     data2={(u):(v) for u,v in data.items()}
+
+       closest = sorted({x:  abs(k-x) for x in binValues}.items(), key=lambda item:item[1])[0][0]
+
+       retDict[closest]+=v
+
+    return retDict
+
+        
+   
+
+
+def plotSim(L,P,S=100,logBin=True,binNumber=10):
+
      
 
-     plt.semilogy(data2.keys(),data2.values(),'o')
+     data= simulate(L,P,S)
+    
+     if logBin:
+        m=max(data.keys())
+        print("M:")
+        print(m)
+        bins= [ pow(m,x/(binNumber-1)) for x in range(binNumber)]
+        print([x for x in range(1,m,m//binNumber)])
+
+     else:
+            bins= [x for x in range(0,max(data.keys()),10)]
+
+
+     data2=bining(data,bins)
+     
+
+     plt.loglog(data2.keys(),data2.values(),'o')
 
      plt.xlabel("Size $s$")
      plt.ylabel("$n(s,p)$")
      title=f"Plot of predicted cluster number density based on $M$={S} Samples, of a $L$ = {L} system, with $p$= {P}" 
+     sxi = -1.0/np.log(P)
 
+     
      plt.title(title)
      plt.show()
 
-plotSim(1000,0.5,100) 
+plotSim(200,0.58,1000,binNumber=33) 
 # L size of grid, P probability, S number of simulations
