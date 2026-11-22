@@ -1,13 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import measurements
+from scipy.stats import linregress
 
 # From the book (page 5)
 L = 20 # dim
-P = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
-M = 1000
+P = np.array([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9])
+M = 10000
 
 averageClusterSizes = np.ones(len(P), dtype=float)
+charClusterSize = np.ones(len(P), dtype=float)
+
 
 for i in range(len(P)):
 	p = P[i] # vary p 
@@ -54,20 +57,71 @@ for i in range(len(P)):
 	################
 	# plot results #
 	################
-	xs = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+	xs = np.array([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20])
 	clusterNumDensity = np.pad(clusterNumDensity, (0, max(0,20 - len(clusterNumDensity))))
-	print(clusterNumDensity, " , p = ", p)	
-	plt.plot(xs, clusterNumDensity, label=f'p = {p}')
+
+	# remove zeros 
+	valid = clusterNumDensity > 0
+	xsValid = xs[valid]
+	densityValid = clusterNumDensity[valid]
+
+	line, = plt.plot(xsValid, np.log(densityValid), label=f'p = {p}')
+
+	# fit linear regression for characteristic cluster size 
+	# https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html
+	slope, intercept, r, q, se = linregress(xsValid, np.log(densityValid))
+	plt.plot(xsValid, slope*xsValid + intercept, linestyle = '--', color=line.get_color())
+	charClusterSize[i] = -1/slope # calc + store characteristic cluster size 
+
 
 plt.xlabel("Cluster Size")
 plt.ylabel("Cluster Number Density (log)")
+plt.plot([],[], 'k--', label='Linear Regression')
 plt.legend()
-plt.yscale("log")
 plt.show()
-
 
 # averge cluster size 
 plt.plot(P,averageClusterSizes)
+
 plt.xlabel("p")
 plt.ylabel("Average Cluster Size")
 plt.show()
+
+# average cluster size exponent 
+x = np.log(1-P)
+y = np.log(averageClusterSizes)
+plt.plot(x,y)
+
+slope,intercept,r,q,se = linregress(x,y)
+plt.plot(x, slope*x + intercept, '--', label='Linear Regression')
+
+plt.xlabel("log(1-p)")
+plt.ylabel("log(Average Cluster Size)")
+plt.legend()
+plt.show()
+
+PcExponent = -slope
+print("Average Cluster Size Exponent: ", PcExponent)
+
+#############################
+# Characteristic cluster size
+
+print("characteristic cluster size: ",charClusterSize)
+
+y = np.log(charClusterSize)
+plt.plot(x, y)
+# find exponent
+slope, intercept, r, q, se = linregress(x,y)
+plt.plot(x, slope*x+ intercept, '--')
+
+plt.ylabel("log(Characteristic Cluster Size)")
+plt.xlabel("log(1 - p)")
+#plt.xscale("log")
+#plt.yscale("log")
+plt.show()
+
+vExponent = -slope
+print("exponent: ", vExponent)
+
+
+
