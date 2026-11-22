@@ -8,7 +8,9 @@ import math
 def generateMaterial(L,p):
     global areaImg
     board=np.random.rand(L,L)
-    m=board<p #Creates array where filled sites are True and empty ones are false
+    m=board<p #from page 25
+    
+    
     boardValues , boardCounts=np.unique(m, return_counts=True)
 
 
@@ -19,7 +21,7 @@ def generateMaterial(L,p):
         unfilledSize=0
 
 
-    lw, num = label(m) #Labels the clusters 
+    lw, num = label(m) #Labels the clusters, from page 26
 
 
     values , counts=np.unique(lw, return_counts=True) #For each label get the size array 
@@ -36,8 +38,9 @@ def generateMaterial(L,p):
 
 
 
-    clusterNumberDict={ k: v/(L*L) for k,v in clusterSizeDict.items() if  v!=0  }
-   
+    clusterNumberDict={ k: v/(L*L) for k,v in clusterSizeDict.items() if  v!=0  } #derived from formula page 22
+
+
     area = sum(m, lw, index=np.arange(lw.max() + 1)) 
 
     areaImg=area[lw]
@@ -121,4 +124,4 @@ def plotSim(L,P,S=100,logBin=True,binNumber=10):
      plt.show()
 
 plotSim(200,0.58,1000,binNumber=33) 
-# L size of grid, P probability, S number of simulations
+# L size of grid, P probability, S number of simulations, LogBin whether bins are logathimically spaced, binNumber: Number of bins
