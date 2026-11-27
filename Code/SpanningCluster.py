@@ -122,11 +122,11 @@ def getInfo(L,P,S=100,printDetails=True):
     if printDetails:
         print(f"Probability of a spanning cluster: {1-(numOfZeros/S)}")
         print(f"Probability that a site belongs a spanning cluster: {np.average(nonZeros)/L**2}")
-    return [1-(numOfZeros/S),np.average(nonZeros)/L**2]
+    return [1-(numOfZeros/S),np.average(data)/L**2]
 
 
 
-plotSim(100)
+plotSim(25,1000)
 #L size of grid, S number of simulations
 
 
